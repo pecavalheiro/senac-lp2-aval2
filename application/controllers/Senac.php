@@ -24,7 +24,7 @@ class Senac extends CI_Controller {
     }
 
     public function turma() {
-
+        $this->load->helper('url');
         $this->load->database();
 
         $funcionarios = $this->db->query('SELECT * FROM usuarios')->result_array();
@@ -41,18 +41,27 @@ class Senac extends CI_Controller {
     }
 
     public function faz_cadastro() {
+
+        $extensao = explode('.', $_FILES['foto']['name']);
+        $extensao = array_pop($extensao);
+        $nome_img = sha1(time()) . '.' . $extensao;
+        $destino = FCPATH . 'uploads/';
+        $caminho_completo = $destino . $nome_img;
+
         $this->load->helper('url');
         $this->load->database();
 
         $data = array(
             'nome' => $_POST['nome'],
             'usuario' => $_POST['email'],
-            'senha' => sha1($_POST['senha'])
+            'senha' => sha1($_POST['senha']),
+            'img' => $nome_img,
         );
 
         if (!$this->db->insert('usuarios', $data)) {
             echo $this->db->error();
         } else {
+            move_uploaded_file($_FILES['foto']['tmp_name'], $caminho_completo);
             redirect('/Senac/turma');
         }
     }
